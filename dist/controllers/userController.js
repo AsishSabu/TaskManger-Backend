@@ -83,6 +83,29 @@ function verifyOtp(req, res, next) {
         }
     });
 }
+function resendOtp(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const id = req.params.id;
+            const deleted = yield otpModel_1.default.deleteOne({ userId: id });
+            const user = yield userModel_1.default.findById(id);
+            if (!user) {
+                res.status(404).json({ message: "User not found" });
+            }
+            else {
+                const OTP = yield authService_1.default.generateOtp();
+                const emailSubject = "Account verification";
+                yield otpModel_1.default.create({ otp: OTP, id });
+                console.log(OTP, "Generated OTP");
+                yield (0, sendMail_1.default)(user.email, emailSubject, (0, authMails_1.otpEmail)(OTP, user.name));
+                res.json({ message: "New OTP sent to email" });
+            }
+        }
+        catch (error) {
+            next(error);
+        }
+    });
+}
 function handleLogin(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -160,4 +183,5 @@ exports.default = {
     getUser,
     getTasks,
     verifyOtp,
+    resendOtp,
 };

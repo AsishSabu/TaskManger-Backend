@@ -79,6 +79,30 @@ async function verifyOtp(req: Request, res: Response, next: NextFunction) {
     next(error)
   }
 }
+
+async function resendOtp(req: Request, res: Response, next: NextFunction) {
+  try {
+   
+    const id  = req.params.id
+    const deleted =await otpModel.deleteOne({ userId:id })
+       
+      const user = await User.findById(id)
+      if (!user) {
+        res.status(404).json({ message: "User not found" })
+      } else {
+        const OTP = await authService.generateOtp()
+        const emailSubject = "Account verification"
+        await otpModel.create({ otp: OTP, id })
+        console.log(OTP, "Generated OTP")
+        await sendMail(user.email, emailSubject, otpEmail(OTP, user.name))
+        res.json({ message: "New OTP sent to email" })
+      }
+    
+  } catch (error) {
+    next(error)
+  }
+}
+
 async function handleLogin(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body
@@ -94,7 +118,10 @@ async function handleLogin(req: Request, res: Response, next: NextFunction) {
       throw new customError("User is blocked", HttpStatus.FORBIDDEN)
     }
     if (!isEmailExist.isVerified) {
-      throw new customError("please use verified mail id", HttpStatus.UNAUTHORIZED)
+      throw new customError(
+        "please use verified mail id",
+        HttpStatus.UNAUTHORIZED
+      )
     }
 
     const isPasswordMatched = await authService.comparePassword(
@@ -167,4 +194,5 @@ export default {
   getUser,
   getTasks,
   verifyOtp,
+  resendOtp,
 }

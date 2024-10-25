@@ -16,29 +16,36 @@ export default function authenticateUser(
   req: Request,
   res: Response,
   next: NextFunction
-) {  
+) {
   const access_token = req.headers.authorization
-  
-  if (!access_token) {
-    return res.status(HttpStatus.FORBIDDEN).json("Your are not authenticated")
-  }
-  const tokenParts = access_token.split(" ")
-  const token = tokenParts.length === 2 ? tokenParts[1] : null
-  if (!token) {
-    return res.status(HttpStatus.FORBIDDEN).json("Invalid access token format")
-  }
-  jwt.verify(token, configKeys.ACCESS_SECRET, (err: any, user: any) => {
-    if (err) {
-      res
-        .status(HttpStatus.FORBIDDEN)
-        .json({ success: false, message: "Token is not valid" })
-    } else if (user.isBlocked) {
-      res
-        .status(HttpStatus.FORBIDDEN)
-        .json({ success: false, message: "user is Blocked" })
+  try {
+    if (!access_token) {
+      res.status(HttpStatus.FORBIDDEN).json("Your are not authenticated")
     } else {
-      req.user = user.id
-      next()
+      const tokenParts = access_token.split(" ")
+      const token = tokenParts.length === 2 ? tokenParts[1] : null
+      if (!token) {
+        res.status(HttpStatus.FORBIDDEN).json("Invalid access token format")
+      } else {
+        jwt.verify(token, configKeys.ACCESS_SECRET, (err: any, user: any) => {
+          if (err) {
+            res
+              .status(HttpStatus.FORBIDDEN)
+              .json({ success: false, message: "Token is not valid" })
+          } else if (user.isBlocked) {
+            res
+              .status(HttpStatus.FORBIDDEN)
+              .json({ success: false, message: "user is Blocked" })
+          } else {
+            req.user = user.id
+            next()
+          }
+        })
+      }
     }
-  })
+  } catch (error) {
+    next(error)
+  }
+
+
 }
