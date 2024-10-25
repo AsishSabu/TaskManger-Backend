@@ -27,7 +27,7 @@ async function getEmployees(req: Request, res: Response, next: NextFunction) {
 }
 async function getAllManagers(req: Request, res: Response, next: NextFunction) {
   try {
-    const managers = await User.find({ role: "manager" })
+    const managers = await User.find({ role: "manager",isVerified:true })
     res
       .status(HttpStatus.OK)
       .json({ message: "Managers fetched successfully", managers })

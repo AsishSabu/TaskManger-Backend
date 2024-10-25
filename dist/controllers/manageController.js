@@ -36,7 +36,7 @@ function getEmployees(req, res, next) {
 function getAllManagers(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const managers = yield userModel_1.default.find({ role: "manager" });
+            const managers = yield userModel_1.default.find({ role: "manager", isVerified: true });
             res
                 .status(httpTypes_1.HttpStatus.OK)
                 .json({ message: "Managers fetched successfully", managers });
@@ -214,7 +214,7 @@ function deleteTask(req, res, next) {
 }
 function deleteTasks(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const taskIds = req.body.ids; // Assuming body contains an array of task IDs
+        const taskIds = req.body.ids;
         try {
             const deletedTasks = yield taskModel_1.Task.deleteMany({ _id: { $in: taskIds } });
             res

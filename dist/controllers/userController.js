@@ -32,13 +32,24 @@ function handleRegister(req, res, next) {
             }
             else {
                 const hashedPassword = yield authService_1.default.encryptedPassword(user.password);
-                const newUser = new userModel_1.default({
-                    name: user.name,
-                    email: user.email,
-                    password: hashedPassword,
-                    role: user.role,
-                    manager: user.manager,
-                });
+                let newUser;
+                if (user.manager) {
+                    newUser = new userModel_1.default({
+                        name: user.name,
+                        email: user.email,
+                        password: hashedPassword,
+                        role: user.role,
+                        manager: user.manager,
+                    });
+                }
+                else {
+                    newUser = new userModel_1.default({
+                        name: user.name,
+                        email: user.email,
+                        password: hashedPassword,
+                        role: user.role,
+                    });
+                }
                 yield newUser.save();
                 const OTP = yield authService_1.default.generateOtp();
                 const emailSubject = "Account verification";

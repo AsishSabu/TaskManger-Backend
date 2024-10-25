@@ -11,6 +11,7 @@ import { otpEmail } from "../utils/authMails"
 
 async function handleRegister(req: Request, res: Response, next: NextFunction) {
   const user: IUser = req.body
+
   try {
     const existingUser = await User.findOne({ email: user.email })
     if (existingUser) {
@@ -19,13 +20,24 @@ async function handleRegister(req: Request, res: Response, next: NextFunction) {
         .json({ message: "email already existed" })
     } else {
       const hashedPassword = await authService.encryptedPassword(user.password)
-      const newUser = new User({
-        name: user.name,
-        email: user.email,
-        password: hashedPassword,
-        role: user.role,
-        manager: user.manager,
-      })
+      let newUser
+      if (user.manager) {
+        newUser = new User({
+          name: user.name,
+          email: user.email,
+          password: hashedPassword,
+          role: user.role,
+          manager: user.manager,
+        })
+      } else {
+        newUser = new User({
+          name: user.name,
+          email: user.email,
+          password: hashedPassword,
+          role: user.role,
+        })
+      }
+
       await newUser.save()
 
       const OTP = await authService.generateOtp()
@@ -75,22 +87,20 @@ async function verifyOtp(req: Request, res: Response, next: NextFunction) {
 
 async function resendOtp(req: Request, res: Response, next: NextFunction) {
   try {
-   
-    const id  = req.params.id
-    const deleted =await otpModel.deleteOne({ userId:id })
-       
-      const user = await User.findById(id)
-      if (!user) {
-        res.status(404).json({ message: "User not found" })
-      } else {
-        const OTP = await authService.generateOtp()
-        const emailSubject = "Account verification"
-        await otpModel.create({ otp: OTP, id })
-        console.log(OTP, "Generated OTP")
-        await sendMail(user.email, emailSubject, otpEmail(OTP, user.name))
-        res.json({ message: "New OTP sent to email" })
-      }
-    
+    const id = req.params.id
+    const deleted = await otpModel.deleteOne({ userId: id })
+
+    const user = await User.findById(id)
+    if (!user) {
+      res.status(404).json({ message: "User not found" })
+    } else {
+      const OTP = await authService.generateOtp()
+      const emailSubject = "Account verification"
+      await otpModel.create({ otp: OTP, id })
+      console.log(OTP, "Generated OTP")
+      await sendMail(user.email, emailSubject, otpEmail(OTP, user.name))
+      res.json({ message: "New OTP sent to email" })
+    }
   } catch (error) {
     next(error)
   }
