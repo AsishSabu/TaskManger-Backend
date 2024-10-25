@@ -11,6 +11,10 @@ const TaskSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    empName: {
+        type: String,
+        required: true,
+    },
     assignedTo: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",

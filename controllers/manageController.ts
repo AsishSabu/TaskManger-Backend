@@ -4,11 +4,15 @@ import ITask from "../types/taskTypes"
 import User from "../models/userModel"
 import { HttpStatus } from "../types/httpTypes"
 import customError from "../utils/customError"
+import IUser from "../types/userTypes"
 
 async function getEmployees(req: Request, res: Response, next: NextFunction) {
   const managerId = req.params.id
   try {
-    const employees = await User.find({ manager: managerId })
+    const employees = await User.find({
+      manager: managerId,
+      status: "approved",
+    })
     res
       .status(HttpStatus.OK)
       .json({ message: "Employees fetched successfully", employees })
@@ -39,14 +43,74 @@ async function getAllManagers(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function userEdit(req: Request, res: Response, next: NextFunction) {
+  const userId = req.params.id
+  const updates: Partial<IUser> = req.body
+  try {
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+      new: true,
+    })
+    if (!updatedUser) {
+      throw new Error("error in updating single task")
+    }
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "Task updated successfully", data: updatedUser })
+  } catch (error) {
+    next(error)
+  }
+}
+
+async function getAllRequests(req: Request, res: Response, next: NextFunction) {
+  const managerId = req.params.id
+  try {
+    const employees = await User.find({ manager: managerId, status: "pending",isVerified:true })
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "Employees Request fetched successfully", employees })
+  } catch (error) {
+    console.error(error)
+    next(
+      new customError(
+        "Failed to fetch Employees Request",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    )
+  }
+}
+async function getAllEmployees(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const employees = await User.find({ role: "employee" })
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "Employees fetched successfully", employees })
+  } catch (error) {
+    console.error(error)
+    next(
+      new customError(
+        "Failed to fetch Employees",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    )
+  }
+}
+
 async function getAllTasks(req: Request, res: Response, next: NextFunction) {
   const managerId = req.params.id
   try {
     const tasks = await Task.find({ assignedBy: managerId })
-    res.status(HttpStatus.OK).json({ message: "All tasks fetched successfully", tasks });
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "All tasks fetched successfully", tasks })
   } catch (error) {
-    console.error(error);
-    next(new customError("Failed to fetch tasks", HttpStatus.INTERNAL_SERVER_ERROR));
+    console.error(error)
+    next(
+      new customError("Failed to fetch tasks", HttpStatus.INTERNAL_SERVER_ERROR)
+    )
   }
 }
 async function addTask(req: Request, res: Response, next: NextFunction) {
@@ -58,12 +122,17 @@ async function addTask(req: Request, res: Response, next: NextFunction) {
       taskDate: task.taskDate,
       assignedTo: task.assignedTo,
       assignedBy: task.assignedBy,
+      empName:task.empName
     })
     await newTask.save()
-    res.status(HttpStatus.CREATED).json({ message: "Task created successfully", data: newTask });
+    res
+      .status(HttpStatus.CREATED)
+      .json({ message: "Task created successfully", data: newTask })
   } catch (error) {
-    console.error(error);
-    next(new customError("Task creation failed", HttpStatus.INTERNAL_SERVER_ERROR));
+    console.error(error)
+    next(
+      new customError("Task creation failed", HttpStatus.INTERNAL_SERVER_ERROR)
+    )
   }
 }
 async function addTaskToAll(req: Request, res: Response, next: NextFunction) {
@@ -80,15 +149,23 @@ async function addTaskToAll(req: Request, res: Response, next: NextFunction) {
         taskDate: task.taskDate,
         assignedTo: each._id,
         assignedBy: task.assignedBy,
+        empName:each.name
       })
       const saved = await newTask.save()
       newTasks.push(saved)
     }
 
-    res.status(HttpStatus.CREATED).json({ message: "Tasks created successfully", data: newTasks });
+    res
+      .status(HttpStatus.CREATED)
+      .json({ message: "Tasks created successfully", data: newTasks })
   } catch (error) {
-    console.error(error);
-    next(new customError("Task creation for all employees failed", HttpStatus.INTERNAL_SERVER_ERROR));
+    console.error(error)
+    next(
+      new customError(
+        "Task creation for all employees failed",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    )
   }
 }
 
@@ -102,10 +179,14 @@ async function updateTask(req: Request, res: Response, next: NextFunction) {
     if (!updatedTask) {
       throw new Error("error in updating single task")
     }
-    res.status(HttpStatus.OK).json({ message: "Task updated successfully", data: updatedTask });
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "Task updated successfully", data: updatedTask })
   } catch (error) {
-    console.error(error);
-    next(new customError("Failed to update task", HttpStatus.INTERNAL_SERVER_ERROR));
+    console.error(error)
+    next(
+      new customError("Failed to update task", HttpStatus.INTERNAL_SERVER_ERROR)
+    )
   }
 }
 
@@ -121,11 +202,11 @@ async function updateTasks(req: Request, res: Response, next: NextFunction) {
   //     }
   //   )
   //   const updatedTasks = await Promise.all(updatePromises)
-//   res.status(HttpStatus.OK).json({ message: "Tasks updated successfully" });
-// } catch (error) {
-//   console.error(error);
-//   next(new customError("Failed to update multiple tasks", HttpStatus.INTERNAL_SERVER_ERROR));
-// }
+  //   res.status(HttpStatus.OK).json({ message: "Tasks updated successfully" });
+  // } catch (error) {
+  //   console.error(error);
+  //   next(new customError("Failed to update multiple tasks", HttpStatus.INTERNAL_SERVER_ERROR));
+  // }
 }
 
 async function deleteTask(req: Request, res: Response, next: NextFunction) {
@@ -134,12 +215,16 @@ async function deleteTask(req: Request, res: Response, next: NextFunction) {
   try {
     const deletedTask = await Task.findByIdAndDelete(taskId)
     if (!deletedTask) {
-      throw new customError("Task not found", HttpStatus.NOT_FOUND);
+      throw new customError("Task not found", HttpStatus.NOT_FOUND)
     }
-    res.status(HttpStatus.OK).json({ message: "Task deleted successfully", data: deletedTask });
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "Task deleted successfully", data: deletedTask })
   } catch (error) {
-    console.error(error);
-    next(new customError("Failed to delete task", HttpStatus.INTERNAL_SERVER_ERROR));
+    console.error(error)
+    next(
+      new customError("Failed to delete task", HttpStatus.INTERNAL_SERVER_ERROR)
+    )
   }
 }
 
@@ -148,10 +233,17 @@ async function deleteTasks(req: Request, res: Response, next: NextFunction) {
 
   try {
     const deletedTasks = await Task.deleteMany({ _id: { $in: taskIds } })
-    res.status(HttpStatus.OK).json({ message: "Tasks deleted successfully", data: deletedTasks });
+    res
+      .status(HttpStatus.OK)
+      .json({ message: "Tasks deleted successfully", data: deletedTasks })
   } catch (error) {
-    console.error(error);
-    next(new customError("Failed to delete tasks", HttpStatus.INTERNAL_SERVER_ERROR));
+    console.error(error)
+    next(
+      new customError(
+        "Failed to delete tasks",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    )
   }
 }
 
@@ -165,4 +257,7 @@ export default {
   deleteTasks,
   getAllTasks,
   getAllManagers,
+  getAllEmployees,
+  getAllRequests,
+  userEdit
 }

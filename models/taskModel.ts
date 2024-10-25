@@ -11,6 +11,10 @@ const TaskSchema = new Schema<ITask>(
       type: String,
       required: true,
     },
+    empName: {
+      type: String,
+      required: true,
+    },
     assignedTo: {
       type: Schema.Types.ObjectId,
       ref: "User",

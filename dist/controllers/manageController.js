@@ -20,7 +20,10 @@ function getEmployees(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const managerId = req.params.id;
         try {
-            const employees = yield userModel_1.default.find({ manager: managerId });
+            const employees = yield userModel_1.default.find({
+                manager: managerId,
+                status: "approved",
+            });
             res
                 .status(httpTypes_1.HttpStatus.OK)
                 .json({ message: "Employees fetched successfully", employees });
@@ -45,12 +48,63 @@ function getAllManagers(req, res, next) {
         }
     });
 }
+function userEdit(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const userId = req.params.id;
+        const updates = req.body;
+        try {
+            const updatedUser = yield userModel_1.default.findByIdAndUpdate(userId, updates, {
+                new: true,
+            });
+            if (!updatedUser) {
+                throw new Error("error in updating single task");
+            }
+            res
+                .status(httpTypes_1.HttpStatus.OK)
+                .json({ message: "Task updated successfully", data: updatedUser });
+        }
+        catch (error) {
+            next(error);
+        }
+    });
+}
+function getAllRequests(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const managerId = req.params.id;
+        try {
+            const employees = yield userModel_1.default.find({ manager: managerId, status: "pending", isVerified: true });
+            res
+                .status(httpTypes_1.HttpStatus.OK)
+                .json({ message: "Employees Request fetched successfully", employees });
+        }
+        catch (error) {
+            console.error(error);
+            next(new customError_1.default("Failed to fetch Employees Request", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    });
+}
+function getAllEmployees(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const employees = yield userModel_1.default.find({ role: "employee" });
+            res
+                .status(httpTypes_1.HttpStatus.OK)
+                .json({ message: "Employees fetched successfully", employees });
+        }
+        catch (error) {
+            console.error(error);
+            next(new customError_1.default("Failed to fetch Employees", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    });
+}
 function getAllTasks(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const managerId = req.params.id;
         try {
             const tasks = yield taskModel_1.Task.find({ assignedBy: managerId });
-            res.status(httpTypes_1.HttpStatus.OK).json({ message: "All tasks fetched successfully", tasks });
+            res
+                .status(httpTypes_1.HttpStatus.OK)
+                .json({ message: "All tasks fetched successfully", tasks });
         }
         catch (error) {
             console.error(error);
@@ -68,9 +122,12 @@ function addTask(req, res, next) {
                 taskDate: task.taskDate,
                 assignedTo: task.assignedTo,
                 assignedBy: task.assignedBy,
+                empName: task.empName
             });
             yield newTask.save();
-            res.status(httpTypes_1.HttpStatus.CREATED).json({ message: "Task created successfully", data: newTask });
+            res
+                .status(httpTypes_1.HttpStatus.CREATED)
+                .json({ message: "Task created successfully", data: newTask });
         }
         catch (error) {
             console.error(error);
@@ -92,11 +149,14 @@ function addTaskToAll(req, res, next) {
                     taskDate: task.taskDate,
                     assignedTo: each._id,
                     assignedBy: task.assignedBy,
+                    empName: each.name
                 });
                 const saved = yield newTask.save();
                 newTasks.push(saved);
             }
-            res.status(httpTypes_1.HttpStatus.CREATED).json({ message: "Tasks created successfully", data: newTasks });
+            res
+                .status(httpTypes_1.HttpStatus.CREATED)
+                .json({ message: "Tasks created successfully", data: newTasks });
         }
         catch (error) {
             console.error(error);
@@ -115,7 +175,9 @@ function updateTask(req, res, next) {
             if (!updatedTask) {
                 throw new Error("error in updating single task");
             }
-            res.status(httpTypes_1.HttpStatus.OK).json({ message: "Task updated successfully", data: updatedTask });
+            res
+                .status(httpTypes_1.HttpStatus.OK)
+                .json({ message: "Task updated successfully", data: updatedTask });
         }
         catch (error) {
             console.error(error);
@@ -151,7 +213,9 @@ function deleteTask(req, res, next) {
             if (!deletedTask) {
                 throw new customError_1.default("Task not found", httpTypes_1.HttpStatus.NOT_FOUND);
             }
-            res.status(httpTypes_1.HttpStatus.OK).json({ message: "Task deleted successfully", data: deletedTask });
+            res
+                .status(httpTypes_1.HttpStatus.OK)
+                .json({ message: "Task deleted successfully", data: deletedTask });
         }
         catch (error) {
             console.error(error);
@@ -164,7 +228,9 @@ function deleteTasks(req, res, next) {
         const taskIds = req.body.ids; // Assuming body contains an array of task IDs
         try {
             const deletedTasks = yield taskModel_1.Task.deleteMany({ _id: { $in: taskIds } });
-            res.status(httpTypes_1.HttpStatus.OK).json({ message: "Tasks deleted successfully", data: deletedTasks });
+            res
+                .status(httpTypes_1.HttpStatus.OK)
+                .json({ message: "Tasks deleted successfully", data: deletedTasks });
         }
         catch (error) {
             console.error(error);
@@ -182,4 +248,7 @@ exports.default = {
     deleteTasks,
     getAllTasks,
     getAllManagers,
+    getAllEmployees,
+    getAllRequests,
+    userEdit
 };

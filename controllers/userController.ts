@@ -127,7 +127,7 @@ async function handleLogin(req: Request, res: Response, next: NextFunction) {
 async function getUser(req: Request, res: Response, next: NextFunction) {
   const id = req.params.id
   try {
-    const user = await User.find({ _id: id })
+    const user = await User.find({ _id: id }).populate("manager")
     if (!user) {
       throw new customError("User not found", HttpStatus.NOT_FOUND)
     }

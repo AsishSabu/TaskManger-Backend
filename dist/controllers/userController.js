@@ -121,7 +121,7 @@ function getUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const id = req.params.id;
         try {
-            const user = yield userModel_1.default.find({ _id: id });
+            const user = yield userModel_1.default.find({ _id: id }).populate("manager");
             if (!user) {
                 throw new customError_1.default("User not found", httpTypes_1.HttpStatus.NOT_FOUND);
             }
