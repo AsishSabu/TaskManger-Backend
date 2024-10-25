@@ -6,10 +6,7 @@ const errorHandlingMiddleware=(
     req:Request,
     res:Response,
     next:NextFunction
-)=>{
-
-    console.log( err.message,".....................");
-  
+)=>{  
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
   if (err.statusCode === 404) {

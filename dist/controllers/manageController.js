@@ -29,7 +29,6 @@ function getEmployees(req, res, next) {
                 .json({ message: "Employees fetched successfully", employees });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to fetch employees", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -43,7 +42,6 @@ function getAllManagers(req, res, next) {
                 .json({ message: "Managers fetched successfully", managers });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to fetch managers", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -78,7 +76,6 @@ function getAllRequests(req, res, next) {
                 .json({ message: "Employees Request fetched successfully", employees });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to fetch Employees Request", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -92,7 +89,6 @@ function getAllEmployees(req, res, next) {
                 .json({ message: "Employees fetched successfully", employees });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to fetch Employees", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -107,7 +103,6 @@ function getAllTasks(req, res, next) {
                 .json({ message: "All tasks fetched successfully", tasks });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to fetch tasks", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -130,7 +125,6 @@ function addTask(req, res, next) {
                 .json({ message: "Task created successfully", data: newTask });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Task creation failed", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -139,7 +133,6 @@ function addTaskToAll(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const task = req.body;
         const employees = yield userModel_1.default.find({ manager: task.assignedBy });
-        console.log(employees);
         const newTasks = [];
         try {
             for (const each of employees) {
@@ -159,7 +152,6 @@ function addTaskToAll(req, res, next) {
                 .json({ message: "Tasks created successfully", data: newTasks });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Task creation for all employees failed", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -180,7 +172,6 @@ function updateTask(req, res, next) {
                 .json({ message: "Task updated successfully", data: updatedTask });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to update task", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -189,7 +180,6 @@ function updateTasks(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const { updates, assignedBy, taskDate } = req.body;
         const tasks = yield taskModel_1.Task.find({ assignedBy, taskDate });
-        console.log(tasks);
         // const newTasks: ITask[] = []
         // try {
         //   const updatePromises = updates.map(
@@ -218,7 +208,6 @@ function deleteTask(req, res, next) {
                 .json({ message: "Task deleted successfully", data: deletedTask });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to delete task", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -233,7 +222,6 @@ function deleteTasks(req, res, next) {
                 .json({ message: "Tasks deleted successfully", data: deletedTasks });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Failed to delete tasks", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });

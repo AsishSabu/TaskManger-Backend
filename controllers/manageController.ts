@@ -17,7 +17,6 @@ async function getEmployees(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "Employees fetched successfully", employees })
   } catch (error) {
-    console.error(error)
     next(
       new customError(
         "Failed to fetch employees",
@@ -33,7 +32,6 @@ async function getAllManagers(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "Managers fetched successfully", managers })
   } catch (error) {
-    console.error(error)
     next(
       new customError(
         "Failed to fetch managers",
@@ -69,7 +67,6 @@ async function getAllRequests(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "Employees Request fetched successfully", employees })
   } catch (error) {
-    console.error(error)
     next(
       new customError(
         "Failed to fetch Employees Request",
@@ -89,7 +86,6 @@ async function getAllEmployees(
       .status(HttpStatus.OK)
       .json({ message: "Employees fetched successfully", employees })
   } catch (error) {
-    console.error(error)
     next(
       new customError(
         "Failed to fetch Employees",
@@ -107,7 +103,6 @@ async function getAllTasks(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "All tasks fetched successfully", tasks })
   } catch (error) {
-    console.error(error)
     next(
       new customError("Failed to fetch tasks", HttpStatus.INTERNAL_SERVER_ERROR)
     )
@@ -129,7 +124,6 @@ async function addTask(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.CREATED)
       .json({ message: "Task created successfully", data: newTask })
   } catch (error) {
-    console.error(error)
     next(
       new customError("Task creation failed", HttpStatus.INTERNAL_SERVER_ERROR)
     )
@@ -138,7 +132,6 @@ async function addTask(req: Request, res: Response, next: NextFunction) {
 async function addTaskToAll(req: Request, res: Response, next: NextFunction) {
   const task: ITask = req.body
   const employees = await User.find({ manager: task.assignedBy })
-  console.log(employees)
   const newTasks: ITask[] = []
 
   try {
@@ -159,7 +152,6 @@ async function addTaskToAll(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.CREATED)
       .json({ message: "Tasks created successfully", data: newTasks })
   } catch (error) {
-    console.error(error)
     next(
       new customError(
         "Task creation for all employees failed",
@@ -183,7 +175,6 @@ async function updateTask(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "Task updated successfully", data: updatedTask })
   } catch (error) {
-    console.error(error)
     next(
       new customError("Failed to update task", HttpStatus.INTERNAL_SERVER_ERROR)
     )
@@ -193,7 +184,6 @@ async function updateTask(req: Request, res: Response, next: NextFunction) {
 async function updateTasks(req: Request, res: Response, next: NextFunction) {
   const { updates, assignedBy, taskDate } = req.body
   const tasks = await Task.find({ assignedBy, taskDate })
-  console.log(tasks)
   // const newTasks: ITask[] = []
   // try {
   //   const updatePromises = updates.map(
@@ -221,7 +211,6 @@ async function deleteTask(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "Task deleted successfully", data: deletedTask })
   } catch (error) {
-    console.error(error)
     next(
       new customError("Failed to delete task", HttpStatus.INTERNAL_SERVER_ERROR)
     )
@@ -229,7 +218,7 @@ async function deleteTask(req: Request, res: Response, next: NextFunction) {
 }
 
 async function deleteTasks(req: Request, res: Response, next: NextFunction) {
-  const taskIds = req.body.ids // Assuming body contains an array of task IDs
+  const taskIds = req.body.ids 
 
   try {
     const deletedTasks = await Task.deleteMany({ _id: { $in: taskIds } })
@@ -237,7 +226,6 @@ async function deleteTasks(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "Tasks deleted successfully", data: deletedTasks })
   } catch (error) {
-    console.error(error)
     next(
       new customError(
         "Failed to delete tasks",

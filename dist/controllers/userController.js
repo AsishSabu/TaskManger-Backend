@@ -23,7 +23,6 @@ const authMails_1 = require("../utils/authMails");
 function handleRegister(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = req.body;
-        console.log(req.body);
         try {
             const existingUser = yield userModel_1.default.findOne({ email: user.email });
             if (existingUser) {
@@ -33,7 +32,6 @@ function handleRegister(req, res, next) {
             }
             else {
                 const hashedPassword = yield authService_1.default.encryptedPassword(user.password);
-                console.log(hashedPassword, "hashed");
                 const newUser = new userModel_1.default({
                     name: user.name,
                     email: user.email,
@@ -41,7 +39,6 @@ function handleRegister(req, res, next) {
                     role: user.role,
                     manager: user.manager,
                 });
-                console.log(newUser, "newuser");
                 yield newUser.save();
                 const OTP = yield authService_1.default.generateOtp();
                 const emailSubject = "Account verification";
@@ -54,7 +51,6 @@ function handleRegister(req, res, next) {
             }
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Server error during registration", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -110,9 +106,7 @@ function handleLogin(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { email, password } = req.body;
-            console.log(req.body);
             const isEmailExist = yield userModel_1.default.findOne({ email });
-            console.log(isEmailExist);
             if (!isEmailExist) {
                 throw new customError_1.default("Invalid Credentials", httpTypes_1.HttpStatus.UNAUTHORIZED);
             }
@@ -135,7 +129,6 @@ function handleLogin(req, res, next) {
             });
         }
         catch (error) {
-            console.error(error);
             next(error);
         }
     });
@@ -153,7 +146,6 @@ function getUser(req, res, next) {
                 .json({ message: "User fetched successfully", user });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Error fetching user", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });
@@ -172,7 +164,6 @@ function getTasks(req, res, next) {
                 .json({ message: "Tasks fetched successfully", tasks, user });
         }
         catch (error) {
-            console.error(error);
             next(new customError_1.default("Error fetching tasks", httpTypes_1.HttpStatus.INTERNAL_SERVER_ERROR));
         }
     });

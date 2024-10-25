@@ -11,8 +11,6 @@ import { otpEmail } from "../utils/authMails"
 
 async function handleRegister(req: Request, res: Response, next: NextFunction) {
   const user: IUser = req.body
-  console.log(req.body)
-
   try {
     const existingUser = await User.findOne({ email: user.email })
     if (existingUser) {
@@ -21,8 +19,6 @@ async function handleRegister(req: Request, res: Response, next: NextFunction) {
         .json({ message: "email already existed" })
     } else {
       const hashedPassword = await authService.encryptedPassword(user.password)
-      console.log(hashedPassword, "hashed")
-
       const newUser = new User({
         name: user.name,
         email: user.email,
@@ -30,8 +26,6 @@ async function handleRegister(req: Request, res: Response, next: NextFunction) {
         role: user.role,
         manager: user.manager,
       })
-      console.log(newUser, "newuser")
-
       await newUser.save()
 
       const OTP = await authService.generateOtp()
@@ -45,7 +39,6 @@ async function handleRegister(req: Request, res: Response, next: NextFunction) {
         .json({ message: "otp is sended to the mail", user: newUser })
     }
   } catch (error) {
-    console.error(error)
     next(
       new customError(
         "Server error during registration",
@@ -106,11 +99,8 @@ async function resendOtp(req: Request, res: Response, next: NextFunction) {
 async function handleLogin(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body
-    console.log(req.body)
 
     const isEmailExist = await User.findOne({ email })
-    console.log(isEmailExist)
-
     if (!isEmailExist) {
       throw new customError("Invalid Credentials", HttpStatus.UNAUTHORIZED)
     }
@@ -146,7 +136,6 @@ async function handleLogin(req: Request, res: Response, next: NextFunction) {
       user: isEmailExist,
     })
   } catch (error) {
-    console.error(error)
     next(error)
   }
 }
@@ -162,7 +151,6 @@ async function getUser(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "User fetched successfully", user })
   } catch (error) {
-    console.error(error)
     next(
       new customError("Error fetching user", HttpStatus.INTERNAL_SERVER_ERROR)
     )
@@ -181,7 +169,6 @@ async function getTasks(req: Request, res: Response, next: NextFunction) {
       .status(HttpStatus.OK)
       .json({ message: "Tasks fetched successfully", tasks, user })
   } catch (error) {
-    console.error(error)
     next(
       new customError("Error fetching tasks", HttpStatus.INTERNAL_SERVER_ERROR)
     )
